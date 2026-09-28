@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator kysely {
+  provider     = "prisma-kysely"
+  output       = "../kysely"
+  fileName     = "types.ts"
+  enumFileName = "enums.ts"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+// ---------- Navigation taxonomy (Segment -> SegmentGroup -> Collection) ----------
+
+model Segment {
+  id        String    @id @default(uuid())
+  slug      String    @unique // "unisex" | "men" | "women" | "kids" | "shop-more"
+  name      String
+  isNav     Boolean   @default(true) // shop-more: false — excluded from GET /navigation segments[]
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  groups      SegmentGroup[]
+  collections Collection[]
+}
+
+model SegmentGroup {
+  id        String    @id @default(uuid())
+  segmentId String
+  title     String // "Tops", "Winter Essentials", …
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  segment     Segment      @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  collections Collection[]
+
+  @@unique([segmentId, title])
+}
+
+model Collection {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  name        String
+  description String    @db.Text
+  isVirtual   Boolean   @default(false) // new-arrival / best-sellers / mega-sale (flag-driven, no join rows)
+  segmentId   String
+  groupId     String
+  sortOrder   Int       @default(0) // order within its group
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  segment    Segment               @relation(fields: [segmentId], references: [id])
+  group      SegmentGroup          @relation(fields: [groupId], references: [id])
+  products   ProductCollection[]
+  promotions PromotionCollection[]
+
+  @@index([segmentId])
+  @@index([groupId])
+}
+
+// ---------- Catalog ----------
+
+model Product {
+  id          String    @id @default(uuid()) // seed keeps the FE's existing "p-*" ids
+  slug        String    @unique
+  name        String
+  description String    @db.Text
+  fit         String    @db.VarChar(512)
+  fabric      String
+  gsm         Int
+  mrp         Int // rupees; convert to paise only at the payment boundary (Phase 3)
+  price       Int
+  sizes       Json // ordered string[], e.g. ["S","M","L","XL","XXL"]
+  features    Json // ordered string[]
+  isNew       Boolean   @default(false)
+  bestSeller  Boolean   @default(false)
+  megaSale    Boolean   @default(false)
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  colors       ProductColor[]
+  qtyDiscounts ProductQtyDiscount[]
+  collections  ProductCollection[]
+  enquiries    Enquiry[]
+  promotions   PromotionProduct[]
+
+  @@index([isNew])
+  @@index([bestSeller])
+  @@index([megaSale])
+}
+
+model ProductColor {
+  id        String    @id @default(uuid())
+  productId String
+  name      String
+  hex       String    @db.VarChar(9)
+  image     String // "/products/x.svg" now; https S3 URL when real photos land
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductQtyDiscount {
+  id        String   @id @default(uuid())
+  productId String
+  minQty    Int
+  offPct    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, minQty])
+}
+
+model ProductCollection {
+  id           String   @id @default(uuid())
+  productId    String
+  collectionId String
+  sortOrder    Int      @default(0) // position in product.collections[]; 0 = primary (breadcrumb/related)
+  createdAt    DateTime @default(now())
+
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, collectionId])
+  @@index([collectionId])
+}
+
+model Fabric {
+  id          String    @id @default(uuid())
+  key         String    @unique // "single-jersey", …
+  name        String
+  description String    @db.Text
+  fit         String    @db.VarChar(512)
+  highlights  Json // ordered string[]
+  image       String
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model Review {
+  id          String    @id @default(uuid())
+  stars       Int
+  quote       String    @db.Text
+  author      String
+  productName String // free text — matches FE Review.product
+  isPublished Boolean   @default(false)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([isPublished])
+}
+
+// ---------- Promotions (admin-published discounts, Phase 2.6) ----------
+
+enum PromotionType {
+  PERCENT
+  FLAT
+}
+
+enum PromotionScope {
+  ALL
+  PRODUCTS
+  COLLECTIONS
+}
+
+model Promotion {
+  id            String         @id @default(uuid())
+  name          String
+  code          String?        @unique // stored UPPERCASE
+  type          PromotionType
+  value         Int // PERCENT: 1-90 ; FLAT: rupees off per piece
+  scope         PromotionScope @default(ALL)
+  minQty        Int?
+  minOrderValue Int?
+  startsAt      DateTime?
+  endsAt        DateTime?
+  isActive      Boolean        @default(true)
+  sortOrder     Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  products    PromotionProduct[]
+  collections PromotionCollection[]
+
+  @@index([isActive])
+}
+
+model PromotionProduct {
+  id          String   @id @default(uuid())
+  promotionId String
+  productId   String
+  createdAt   DateTime @default(now())
+
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([promotionId, productId])
+  @@index([productId])
+}
+
+model PromotionCollection {
+  id           String   @id @default(uuid())
+  promotionId  String
+  collectionId String
+  createdAt    DateTime @default(now())
+
+  promotion  Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([promotionId, collectionId])
+  @@index([collectionId])
+}
+
+// ---------- Leads ----------
+
+model Enquiry {
+  id          String        @id @default(uuid())
+  name        String
+  company     String?
+  phone       String
+  productId   String?
+  productName String? // snapshot of the product name at submit time
+  quantity    String? // free text ("100 pcs")
+  message     String?       @db.Text
+  status      EnquiryStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+}
+
+model NewsletterSubscriber {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // re-subscribe clears deletedAt (idempotent POST)
+}
+
+// ---------- Users & auth ----------
+
+enum AddressType {
+  HOME
+  WORK
+  OTHER
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String?   @unique
+  name         String?
+  phone        String?
+  passwordHash String? // null until the user sets one (Google-only accounts)
+  googleId     String?   @unique // Google `sub`, set on first Google sign-in
+  role         Role      @default(CUSTOMER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  addresses   Address[]
+  resetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique // sha256 of the token emailed to the user
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Address {
+  id        String      @id @default(uuid())
+  userId    String
+  fullName  String
+  phone     String
+  line1     String // house no, building, street
+  line2     String? // area, landmark
+  city      String
+  state     String
+  pincode   String      @db.VarChar(10)
+  type      AddressType @default(HOME)
+  isDefault Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
