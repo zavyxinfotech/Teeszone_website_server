@@ -13,6 +13,11 @@ const routes: IRouteOptions[] = [
     preHandler: [authMiddleware, adminMiddleware],
     handler: uploadController.image,
   },
+  {
+    url: "/media/*",
+    method: API_METHODS.GET,
+    handler: uploadController.media,
+  },
 ];
 
 export default routes;

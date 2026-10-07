@@ -3,6 +3,7 @@ import { fmt } from "../../config";
 import { BadRequestException } from "../../exception/badrequest.exception";
 import { NotFoundException } from "../../exception/notfound.exception";
 import { cacheGet, cacheInvalidate, cacheSet } from "../../services/cache.service";
+import { deleteS3Objects } from "../../services/s3.service";
 import {
   getProductById,
   getProductBySlug,
@@ -63,6 +64,15 @@ async function writeProduct(body: UpsertBody, existingId?: string): Promise<stri
     });
   }
 
+  let oldImages: string[] = [];
+  if (existingId) {
+    const oldColors = await client.productColor.findMany({
+      where: { productId: existingId },
+      select: { image: true },
+    });
+    oldImages = oldColors.map((c) => c.image).filter(Boolean);
+  }
+
   const base = {
     name: body.name,
     slug: body.slug,
@@ -81,32 +91,42 @@ async function writeProduct(body: UpsertBody, existingId?: string): Promise<stri
     sortOrder: body.sortOrder,
   };
 
-  return client.$transaction(async (tx) => {
-    let productId = existingId;
-    if (productId) {
-      await tx.product.update({ where: { id: productId }, data: base });
+  const productId = await client.$transaction(async (tx) => {
+    let pId = existingId;
+    if (pId) {
+      await tx.product.update({ where: { id: pId }, data: base });
     } else {
       const created = await tx.product.create({ data: base });
-      productId = created.id;
+      pId = created.id;
     }
-    await tx.productColor.deleteMany({ where: { productId } });
+    await tx.productColor.deleteMany({ where: { productId: pId } });
     await tx.productColor.createMany({
-      data: body.colors.map((c, i) => ({ productId: productId!, ...c, sortOrder: i })),
+      data: body.colors.map((c, i) => ({ productId: pId!, ...c, sortOrder: i })),
     });
-    await tx.productQtyDiscount.deleteMany({ where: { productId } });
+    await tx.productQtyDiscount.deleteMany({ where: { productId: pId } });
     await tx.productQtyDiscount.createMany({
-      data: body.qtyDiscounts.map((t) => ({ productId: productId!, ...t })),
+      data: body.qtyDiscounts.map((t) => ({ productId: pId!, ...t })),
     });
-    await tx.productCollection.deleteMany({ where: { productId } });
+    await tx.productCollection.deleteMany({ where: { productId: pId } });
     await tx.productCollection.createMany({
       data: body.collections.map((slug, i) => ({
-        productId: productId!,
+        productId: pId!,
         collectionId: foundBySlug.get(slug)!.id,
         sortOrder: i,
       })),
     });
-    return productId!;
+    return pId!;
   });
+
+  if (oldImages.length > 0) {
+    const newImages = new Set(body.colors.map((c) => c.image));
+    const removedImages = oldImages.filter((img) => !newImages.has(img));
+    if (removedImages.length > 0) {
+      await deleteS3Objects(removedImages);
+    }
+  }
+
+  return productId;
 }
 
 class ProductsController {
@@ -249,10 +269,22 @@ class ProductsController {
           description: `No product with id "${req.params.id}".`,
         });
       }
+
+      const colors = await client.productColor.findMany({
+        where: { productId: existing.id },
+        select: { image: true },
+      });
+
       await client.product.update({
         where: { id: existing.id },
         data: { deletedAt: new Date() },
       });
+
+      const imagesToDelete = colors.map((c) => c.image).filter(Boolean);
+      if (imagesToDelete.length > 0) {
+        await deleteS3Objects(imagesToDelete);
+      }
+
       await cacheInvalidate();
       reply.status(200).send(fmt.formatResponse({ deleted: true }, "Product deleted"));
     } catch (error) {

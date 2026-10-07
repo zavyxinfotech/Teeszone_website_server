@@ -4,6 +4,7 @@ import { BadRequestException } from "../../exception/badrequest.exception";
 import { NotFoundException } from "../../exception/notfound.exception";
 import { cacheGet, cacheInvalidate, cacheSet } from "../../services/cache.service";
 import { FabricDTO, listFabrics } from "../../services/catalog.service";
+import { deleteS3Object } from "../../services/s3.service";
 import { captureRequestError } from "../../utils/error-tracking";
 import client from "../../utils/prisma";
 
@@ -101,7 +102,11 @@ class FabricsController {
           description: `No fabric with id "${req.params.id}".`,
         });
       }
+      const oldImage = existing.image;
       const row = await client.fabric.update({ where: { id: existing.id }, data: req.body });
+      if (oldImage && oldImage !== req.body.image) {
+        await deleteS3Object(oldImage);
+      }
       await cacheInvalidate();
       reply.status(200).send(fmt.formatResponse(toDTO(row), "Fabric updated"));
     } catch (error) {
@@ -122,6 +127,9 @@ class FabricsController {
         });
       }
       await client.fabric.update({ where: { id: existing.id }, data: { deletedAt: new Date() } });
+      if (existing.image) {
+        await deleteS3Object(existing.image);
+      }
       await cacheInvalidate();
       reply.status(200).send(fmt.formatResponse({ deleted: true }, "Fabric deleted"));
     } catch (error) {

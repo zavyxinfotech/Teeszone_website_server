@@ -27,13 +27,12 @@ const upsertBody = z
   .object({
     name: z.string().min(1).max(120),
     code: z
-      .string()
-      .trim()
-      .toUpperCase()
-      .regex(/^[A-Z0-9-]{3,20}$/, "code must be 3-20 chars: A-Z, 0-9, -")
-      .nullable()
-      .optional()
-      .transform((v) => (v ? v : null)),
+      .union([z.string(), z.null(), z.undefined()])
+      .transform((v) => {
+        if (!v) return null;
+        const trimmed = v.trim().toUpperCase();
+        return trimmed.length > 0 ? trimmed : null;
+      }),
     type: z.enum(["PERCENT", "FLAT"]),
     value: z.number().int().positive(),
     scope: z.enum(["ALL", "PRODUCTS", "COLLECTIONS"]).default("ALL"),
@@ -41,8 +40,20 @@ const upsertBody = z
     collectionSlugs: z.array(z.string()).default([]),
     minQty: z.number().int().positive().nullable().optional().transform((v) => v ?? null),
     minOrderValue: z.number().int().positive().nullable().optional().transform((v) => v ?? null),
-    startsAt: z.string().datetime().nullable().optional().transform((v) => v ?? null),
-    endsAt: z.string().datetime().nullable().optional().transform((v) => v ?? null),
+    startsAt: z
+      .union([z.string(), z.null(), z.undefined()])
+      .transform((v) => {
+        if (!v) return null;
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? null : d.toISOString();
+      }),
+    endsAt: z
+      .union([z.string(), z.null(), z.undefined()])
+      .transform((v) => {
+        if (!v) return null;
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? null : d.toISOString();
+      }),
     isActive: z.boolean().default(true),
     sortOrder: z.number().int().default(0),
   })
