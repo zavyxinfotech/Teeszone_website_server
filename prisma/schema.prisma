@@ -28,8 +28,8 @@ enum EnquiryStatus {
 // ---------- Navigation taxonomy (Segment -> SegmentGroup -> Collection) ----------
 
 model Segment {
-  id        String    @id @default(uuid())
-  slug      String    @unique // "unisex" | "men" | "women" | "kids" | "shop-more"
+  id        String    @id @default(uuid()) @db.VarChar(191)
+  slug      String    @unique @db.VarChar(191) // "unisex" | "men" | "women" | "kids" | "shop-more"
   name      String
   isNav     Boolean   @default(true) // shop-more: false — excluded from GET /navigation segments[]
   sortOrder Int       @default(0)
@@ -42,9 +42,9 @@ model Segment {
 }
 
 model SegmentGroup {
-  id        String    @id @default(uuid())
-  segmentId String
-  title     String // "Tops", "Winter Essentials", …
+  id        String    @id @default(uuid()) @db.VarChar(191)
+  segmentId String    @db.VarChar(191)
+  title     String    @db.VarChar(191) // "Tops", "Winter Essentials", …
   sortOrder Int       @default(0)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -57,13 +57,13 @@ model SegmentGroup {
 }
 
 model Collection {
-  id          String    @id @default(uuid())
-  slug        String    @unique
+  id          String    @id @default(uuid()) @db.VarChar(191)
+  slug        String    @unique @db.VarChar(191)
   name        String
   description String    @db.Text
   isVirtual   Boolean   @default(false) // new-arrival / best-sellers / mega-sale (flag-driven, no join rows)
-  segmentId   String
-  groupId     String
+  segmentId   String    @db.VarChar(191)
+  groupId     String    @db.VarChar(191)
   sortOrder   Int       @default(0) // order within its group
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -81,8 +81,8 @@ model Collection {
 // ---------- Catalog ----------
 
 model Product {
-  id          String    @id @default(uuid()) // seed keeps the FE's existing "p-*" ids
-  slug        String    @unique
+  id          String    @id @default(uuid()) @db.VarChar(191) // seed keeps the FE's existing "p-*" ids
+  slug        String    @unique @db.VarChar(191)
   name        String
   description String    @db.Text
   fit         String    @db.VarChar(512)
@@ -113,15 +113,20 @@ model Product {
 }
 
 model ProductColor {
-  id        String    @id @default(uuid())
-  productId String
-  name      String
-  hex       String    @db.VarChar(9)
-  image     String // "/products/x.svg" now; https S3 URL when real photos land
-  sortOrder Int       @default(0)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id          String    @id @default(uuid()) @db.VarChar(191)
+  productId   String    @db.VarChar(191)
+  name        String
+  hex         String    @db.VarChar(9)
+  image       String    @db.Text // Main Image
+  backImage   String?   @db.Text
+  chestImage  String?   @db.Text
+  detailImage String?   @db.Text
+  image4      String?   @db.Text
+  image5      String?   @db.Text
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -129,8 +134,8 @@ model ProductColor {
 }
 
 model ProductQtyDiscount {
-  id        String   @id @default(uuid())
-  productId String
+  id        String   @id @default(uuid()) @db.VarChar(191)
+  productId String   @db.VarChar(191)
   minQty    Int
   offPct    Int
   createdAt DateTime @default(now())
@@ -142,9 +147,9 @@ model ProductQtyDiscount {
 }
 
 model ProductCollection {
-  id           String   @id @default(uuid())
-  productId    String
-  collectionId String
+  id           String   @id @default(uuid()) @db.VarChar(191)
+  productId    String   @db.VarChar(191)
+  collectionId String   @db.VarChar(191)
   sortOrder    Int      @default(0) // position in product.collections[]; 0 = primary (breadcrumb/related)
   createdAt    DateTime @default(now())
 

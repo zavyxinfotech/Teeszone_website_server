@@ -12,7 +12,18 @@ export const productEntity = z.object({
   gsm: z.number(),
   mrp: z.number(),
   price: z.number(),
-  colors: z.array(z.object({ name: z.string(), hex: z.string(), image: z.string() })),
+  colors: z.array(
+    z.object({
+      name: z.string(),
+      hex: z.string(),
+      image: z.string(),
+      backImage: z.string().optional().nullable(),
+      chestImage: z.string().optional().nullable(),
+      detailImage: z.string().optional().nullable(),
+      image4: z.string().optional().nullable(),
+      image5: z.string().optional().nullable(),
+    }),
+  ),
   sizes: z.array(z.string()),
   qtyDiscounts: z.array(z.object({ minQty: z.number(), offPct: z.number() })),
   features: z.array(z.string()),
@@ -41,7 +52,18 @@ const upsertBody = z.object({
   sizes: z.array(z.string().min(1)).min(1),
   features: z.array(z.string()).default([]),
   colors: z
-    .array(z.object({ name: z.string().min(1), hex: z.string().min(1), image: z.string().min(1) }))
+    .array(
+      z.object({
+        name: z.string().min(1),
+        hex: z.string().min(1),
+        image: z.string().min(1),
+        backImage: z.string().optional().nullable(),
+        chestImage: z.string().optional().nullable(),
+        detailImage: z.string().optional().nullable(),
+        image4: z.string().optional().nullable(),
+        image5: z.string().optional().nullable(),
+      }),
+    )
     .min(1),
   qtyDiscounts: z.array(z.object({ minQty: z.number().int().positive(), offPct: z.number().int().min(0).max(90) })).default([]),
   collections: z.array(z.string()).default([]),

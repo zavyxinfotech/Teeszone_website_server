@@ -13,7 +13,16 @@ export interface ProductDTO {
   gsm: number;
   mrp: number;
   price: number;
-  colors: { name: string; hex: string; image: string }[];
+  colors: {
+    name: string;
+    hex: string;
+    image: string;
+    backImage?: string | null;
+    chestImage?: string | null;
+    detailImage?: string | null;
+    image4?: string | null;
+    image5?: string | null;
+  }[];
   sizes: string[];
   qtyDiscounts: { minQty: number; offPct: number }[];
   features: string[];
@@ -73,7 +82,7 @@ async function hydrateProducts(rows: ProductRow[]): Promise<ProductDTO[]> {
 
   const colors = await db
     .selectFrom("ProductColor")
-    .select(["productId", "name", "hex", "image"])
+    .select(["productId", "name", "hex", "image", "backImage", "chestImage", "detailImage", "image4", "image5"])
     .where("productId", "in", ids)
     .where("deletedAt", "is", null)
     .orderBy("sortOrder", "asc")
@@ -96,10 +105,19 @@ async function hydrateProducts(rows: ProductRow[]): Promise<ProductDTO[]> {
     .orderBy("ProductCollection.sortOrder", "asc")
     .execute();
 
-  const colorsBy = new Map<string, { name: string; hex: string; image: string }[]>();
+  const colorsBy = new Map<string, { name: string; hex: string; image: string; backImage?: string | null; chestImage?: string | null; detailImage?: string | null; image4?: string | null; image5?: string | null }[]>();
   for (const c of colors) {
     const list = colorsBy.get(c.productId) ?? [];
-    list.push({ name: c.name, hex: c.hex, image: c.image });
+    list.push({
+      name: c.name,
+      hex: c.hex,
+      image: c.image,
+      backImage: c.backImage,
+      chestImage: c.chestImage,
+      detailImage: c.detailImage,
+      image4: c.image4,
+      image5: c.image5,
+    });
     colorsBy.set(c.productId, list);
   }
   const tiersBy = new Map<string, { minQty: number; offPct: number }[]>();

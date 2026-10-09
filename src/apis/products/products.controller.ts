@@ -32,7 +32,16 @@ type UpsertBody = {
   price: number;
   sizes: string[];
   features: string[];
-  colors: { name: string; hex: string; image: string }[];
+  colors: {
+    name: string;
+    hex: string;
+    image: string;
+    backImage?: string | null;
+    chestImage?: string | null;
+    detailImage?: string | null;
+    image4?: string | null;
+    image5?: string | null;
+  }[];
   qtyDiscounts: { minQty: number; offPct: number }[];
   collections: string[];
   isNew: boolean;
@@ -68,9 +77,9 @@ async function writeProduct(body: UpsertBody, existingId?: string): Promise<stri
   if (existingId) {
     const oldColors = await client.productColor.findMany({
       where: { productId: existingId },
-      select: { image: true },
+      select: { image: true, backImage: true, chestImage: true, detailImage: true, image4: true, image5: true },
     });
-    oldImages = oldColors.map((c) => c.image).filter(Boolean);
+    oldImages = oldColors.flatMap((c) => [c.image, c.backImage, c.chestImage, c.detailImage, c.image4, c.image5]).filter((img): img is string => Boolean(img));
   }
 
   const base = {
@@ -101,7 +110,18 @@ async function writeProduct(body: UpsertBody, existingId?: string): Promise<stri
     }
     await tx.productColor.deleteMany({ where: { productId: pId } });
     await tx.productColor.createMany({
-      data: body.colors.map((c, i) => ({ productId: pId!, ...c, sortOrder: i })),
+      data: body.colors.map((c, i) => ({
+        productId: pId!,
+        name: c.name,
+        hex: c.hex,
+        image: c.image,
+        backImage: c.backImage || null,
+        chestImage: c.chestImage || null,
+        detailImage: c.detailImage || null,
+        image4: c.image4 || null,
+        image5: c.image5 || null,
+        sortOrder: i,
+      })),
     });
     await tx.productQtyDiscount.deleteMany({ where: { productId: pId } });
     await tx.productQtyDiscount.createMany({
@@ -119,7 +139,7 @@ async function writeProduct(body: UpsertBody, existingId?: string): Promise<stri
   });
 
   if (oldImages.length > 0) {
-    const newImages = new Set(body.colors.map((c) => c.image));
+    const newImages = new Set(body.colors.flatMap((c) => [c.image, c.backImage, c.chestImage, c.detailImage, c.image4, c.image5]).filter(Boolean));
     const removedImages = oldImages.filter((img) => !newImages.has(img));
     if (removedImages.length > 0) {
       await deleteS3Objects(removedImages);
@@ -272,7 +292,7 @@ class ProductsController {
 
       const colors = await client.productColor.findMany({
         where: { productId: existing.id },
-        select: { image: true },
+        select: { image: true, backImage: true, chestImage: true, detailImage: true, image4: true, image5: true },
       });
 
       await client.product.update({
@@ -280,7 +300,9 @@ class ProductsController {
         data: { deletedAt: new Date() },
       });
 
-      const imagesToDelete = colors.map((c) => c.image).filter(Boolean);
+      const imagesToDelete = colors
+        .flatMap((c) => [c.image, c.backImage, c.chestImage, c.detailImage, c.image4, c.image5])
+        .filter((img): img is string => Boolean(img));
       if (imagesToDelete.length > 0) {
         await deleteS3Objects(imagesToDelete);
       }

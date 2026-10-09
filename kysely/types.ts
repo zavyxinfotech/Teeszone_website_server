@@ -111,6 +111,11 @@ export type ProductColor = {
     name: string;
     hex: string;
     image: string;
+    backImage: string | null;
+    chestImage: string | null;
+    detailImage: string | null;
+    image4: string | null;
+    image5: string | null;
     sortOrder: Generated<number>;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
