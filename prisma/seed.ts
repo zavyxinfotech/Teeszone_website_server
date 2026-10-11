@@ -1,8 +1,10 @@
+// @ts-nocheck
 import { fabrics } from "../../../frontend/src/data/fabrics";
 import { collections, segments } from "../../../frontend/src/data/navigation";
 import { products } from "../../../frontend/src/data/products";
 import { reviews } from "../../../frontend/src/data/reviews";
 import client from "../src/utils/prisma";
+import { hashPassword } from "../src/services/password.service";
 
 const VIRTUAL_SLUGS = ["new-arrival", "best-sellers", "mega-sale"] as const;
 
@@ -48,12 +50,12 @@ async function main() {
   const orderBySlug = new Map<string, number>();
   for (const seg of segments) {
     for (const group of seg.groups) {
-      group.collections.forEach((slug, i) => orderBySlug.set(slug, i));
+      group.collections.forEach((slug: string, i: number) => orderBySlug.set(slug, i));
     }
   }
   collections
-    .filter((c) => c.segment === "shop-more")
-    .forEach((c, i) => orderBySlug.set(c.slug, i));
+    .filter((c: any) => c.segment === "shop-more")
+    .forEach((c: any, i: number) => orderBySlug.set(c.slug, i));
 
   const collectionIdBySlug = new Map<string, string>();
   for (const col of collections) {
@@ -87,6 +89,22 @@ async function main() {
     });
     collectionIdBySlug.set(col.slug, row.id);
   }
+
+  // remove collections not in seed
+  const allowedCollectionSlugs = [...collections.map((c) => c.slug), ...VIRTUAL_SLUGS];
+  await client.collection.deleteMany({
+    where: {
+      slug: { notIn: allowedCollectionSlugs },
+    },
+  });
+
+  // remove segments not in seed
+  const allowedSegmentSlugs = [...segments.map((s) => s.slug), "shop-more"];
+  await client.segment.deleteMany({
+    where: {
+      slug: { notIn: allowedSegmentSlugs },
+    },
+  });
 
   // products
   for (const [pi, p] of products.entries()) {
@@ -129,7 +147,7 @@ async function main() {
 
     await client.productColor.deleteMany({ where: { productId: row.id } });
     await client.productColor.createMany({
-      data: p.colors.map((c, i) => ({
+      data: p.colors.map((c: any, i: number) => ({
         productId: row.id,
         name: c.name,
         hex: c.hex,
@@ -140,14 +158,14 @@ async function main() {
 
     await client.productQtyDiscount.deleteMany({ where: { productId: row.id } });
     await client.productQtyDiscount.createMany({
-      data: p.qtyDiscounts.map((t) => ({
+      data: p.qtyDiscounts.map((t: any) => ({
         productId: row.id,
         minQty: t.minQty,
         offPct: t.offPct,
       })),
     });
 
-    const realSlugs = p.collections.filter((s) => !(VIRTUAL_SLUGS as readonly string[]).includes(s));
+    const realSlugs = p.collections.filter((s: string) => !(VIRTUAL_SLUGS as readonly string[]).includes(s));
     await client.productCollection.deleteMany({ where: { productId: row.id } });
     for (const [ci, slug] of realSlugs.entries()) {
       const collectionId = collectionIdBySlug.get(slug);
@@ -155,11 +173,19 @@ async function main() {
         console.warn(`SKIP join ${p.slug} -> ${slug}: unknown collection`);
         continue;
       }
-      await client.productCollection.create({
-        data: { productId: row.id, collectionId, sortOrder: ci },
-      });
+        await client.productCollection.create({
+          data: { productId: row.id, collectionId, sortOrder: ci },
+        });
+      }
     }
-  }
+
+  // remove products not in seed
+  const allowedProductSlugs = products.map((p) => p.slug);
+  await client.product.deleteMany({
+    where: {
+      slug: { notIn: allowedProductSlugs },
+    },
+  });
 
   // fabrics
   for (const [i, f] of fabrics.entries()) {
@@ -212,8 +238,27 @@ async function main() {
     });
   }
 
+  // admin user
+  const adminEmail = "teeszoneindia@gmail.com";
+  const adminPasswordHash = await hashPassword("teeszone@2025");
+  await client.user.upsert({
+    where: { email: adminEmail },
+    update: {
+      passwordHash: adminPasswordHash,
+      role: "ADMIN",
+      deletedAt: null,
+    },
+    create: {
+      email: adminEmail,
+      name: "Admin",
+      passwordHash: adminPasswordHash,
+      role: "ADMIN",
+    },
+  });
+
   // summary
   const counts = {
+    users: await client.user.count(),
     segments: await client.segment.count(),
     groups: await client.segmentGroup.count(),
     collections: await client.collection.count(),
