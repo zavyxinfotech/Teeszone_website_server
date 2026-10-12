@@ -293,6 +293,7 @@ model User {
   email        String?   @unique
   name         String?
   phone        String?
+  company      String?
   passwordHash String? // null until the user sets one (Google-only accounts)
   googleId     String?   @unique // Google `sub`, set on first Google sign-in
   role         Role      @default(CUSTOMER)

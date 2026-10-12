@@ -17,6 +17,7 @@ const toDTO = (row: {
   email: string | null;
   name: string | null;
   phone: string | null;
+  company?: string | null;
   role: Role;
   passwordHash: string | null;
   googleId: string | null;
@@ -27,6 +28,7 @@ const toDTO = (row: {
   email: row.email ?? "",
   name: row.name ?? "",
   phone: row.phone ?? "",
+  company: row.company ?? "",
   role: row.role,
   hasPassword: !!row.passwordHash,
   googleLinked: !!row.googleId,
@@ -50,6 +52,7 @@ class CustomersController {
                 { name: { contains: q } },
                 { email: { contains: q } },
                 { phone: { contains: q } },
+                { company: { contains: q } },
               ],
             }
           : {}),

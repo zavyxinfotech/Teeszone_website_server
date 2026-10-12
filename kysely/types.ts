@@ -194,6 +194,7 @@ export type User = {
     email: string | null;
     name: string | null;
     phone: string | null;
+    company: string | null;
     passwordHash: string | null;
     googleId: string | null;
     role: Generated<Role>;

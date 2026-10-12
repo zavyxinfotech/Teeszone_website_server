@@ -6,6 +6,7 @@ export const customerEntity = z.object({
   email: z.string(),
   name: z.string(),
   phone: z.string(),
+  company: z.string(),
   role: z.enum(["CUSTOMER", "ADMIN"]),
   hasPassword: z.boolean(),
   googleLinked: z.boolean(),

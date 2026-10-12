@@ -34,6 +34,7 @@ const serializeUser = (user: User) => ({
   email: user.email ?? "",
   name: user.name ?? "",
   phone: user.phone ?? "",
+  company: user.company ?? "",
   role: user.role,
   hasPassword: !!user.passwordHash,
   googleLinked: !!user.googleId,
@@ -49,12 +50,30 @@ class AuthController {
   }
 
   register = async (
-    req: FastifyRequest<{ Body: { name: string; email: string; password: string } }>,
+    req: FastifyRequest<{
+      Body: {
+        name: string;
+        email: string;
+        password: string;
+        phone: string;
+        company?: string;
+        line1: string;
+        city: string;
+        state: string;
+        pincode: string;
+      };
+    }>,
     reply: FastifyReply,
   ) => {
     try {
       const email = req.body.email.trim().toLowerCase();
       const name = req.body.name.trim();
+      const phone = req.body.phone ? req.body.phone.trim() : null;
+      const company = req.body.company ? req.body.company.trim() : null;
+      const line1 = req.body.line1.trim();
+      const city = req.body.city.trim();
+      const state = req.body.state.trim();
+      const pincode = req.body.pincode.trim();
 
       const existing = await client.user.findUnique({ where: { email } });
       if (existing && !existing.deletedAt) {
@@ -79,11 +98,26 @@ class AuthController {
       const user = existing
         ? await client.user.update({
             where: { id: existing.id },
-            data: { name, passwordHash, role: roleFor(email), deletedAt: null },
+            data: { name, phone, company, passwordHash, role: roleFor(email), deletedAt: null },
           })
         : await client.user.create({
-            data: { email, name, passwordHash, role: roleFor(email) },
+            data: { email, name, phone, company, passwordHash, role: roleFor(email) },
           });
+
+      // Save initial address
+      await client.address.create({
+        data: {
+          userId: user.id,
+          fullName: name,
+          phone: phone || "",
+          line1,
+          city,
+          state,
+          pincode,
+          type: "HOME",
+          isDefault: true,
+        },
+      });
 
       await this.issueSession(reply, user, "Account created", 201);
     } catch (error) {
