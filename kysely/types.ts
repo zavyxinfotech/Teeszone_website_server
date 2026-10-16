@@ -131,6 +131,13 @@ export type ProductColor = {
     updatedAt: Timestamp;
     deletedAt: Timestamp | null;
 };
+export type ProductLike = {
+    id: string;
+    userId: string;
+    productSlug: string;
+    productName: string;
+    createdAt: Generated<Timestamp>;
+};
 export type ProductQtyDiscount = {
     id: string;
     productId: string;
@@ -225,6 +232,7 @@ export type DB = {
     Product: Product;
     ProductCollection: ProductCollection;
     ProductColor: ProductColor;
+    productlike: ProductLike;
     ProductQtyDiscount: ProductQtyDiscount;
     Promotion: Promotion;
     PromotionCollection: PromotionCollection;

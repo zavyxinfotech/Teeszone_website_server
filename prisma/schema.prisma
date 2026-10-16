@@ -306,6 +306,7 @@ model User {
 
   addresses   Address[]
   resetTokens PasswordResetToken[]
+  likes       ProductLike[]
 }
 
 model PasswordResetToken {
@@ -350,4 +351,19 @@ model HomeContent {
   processSteps  Json
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model ProductLike {
+  id          String   @id @default(uuid()) @db.VarChar(64)
+  userId      String   @db.VarChar(64)
+  productSlug String   @db.VarChar(128)
+  productName String   @db.VarChar(191)
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productSlug])
+  @@index([userId])
+  @@index([productSlug])
+  @@map("productlike")
 }
