@@ -96,10 +96,11 @@ model Product {
   bestSeller  Boolean   @default(false)
   megaSale    Boolean   @default(false)
   isActive    Boolean   @default(true)
-  sortOrder   Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  sortOrder       Int       @default(0)
+  ordersDelivered Int       @default(850)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
 
   colors       ProductColor[]
   qtyDiscounts ProductQtyDiscount[]
@@ -175,16 +176,18 @@ model Fabric {
 }
 
 model Review {
-  id          String    @id @default(uuid())
-  stars       Int
-  quote       String    @db.Text
-  author      String
-  productName String // free text — matches FE Review.product
-  isPublished Boolean   @default(false)
-  sortOrder   Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id            String    @id @default(uuid())
+  stars         Int
+  quote         String    @db.Text
+  author        String
+  productName   String // free text — matches FE Review.product
+  customerImage String?   @db.Text
+  productImage  String?   @db.Text
+  isPublished   Boolean   @default(false)
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
 
   @@index([isPublished])
 }

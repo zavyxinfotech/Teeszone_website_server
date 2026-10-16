@@ -17,6 +17,8 @@ import { captureRequestError } from "./utils/error-tracking";
 import { rTracerPlugin } from "./utils/logger";
 import client from "./utils/prisma";
 import redisClient from "./utils/redis";
+import paymentsController from "./apis/payments/payments.controller";
+import { createOrderSchema, verifyPaymentSchema } from "./apis/payments/payments.schema";
 
 type ListenCallbackFunction = (err: Error | null, address: string) => void;
 
@@ -83,6 +85,18 @@ class App {
       options: { prefix: "/api" },
       dir: path.join(__dirname, "apis"),
     });
+
+    // Direct endpoints matching specification
+    this.fastifyInstance.post(
+      "/api/create-order",
+      { schema: createOrderSchema },
+      paymentsController.createOrder
+    );
+    this.fastifyInstance.post(
+      "/api/verify-payment",
+      { schema: verifyPaymentSchema },
+      paymentsController.verifyPayment
+    );
   }
 
   public connectPrisma() {

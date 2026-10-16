@@ -30,6 +30,7 @@ export const productEntity = z.object({
   isNew: z.boolean(),
   bestSeller: z.boolean(),
   megaSale: z.boolean(),
+  ordersDelivered: z.number().optional().nullable(),
 });
 
 export const adminProductEntity = productEntity.extend({
@@ -72,6 +73,7 @@ const upsertBody = z.object({
   megaSale: z.boolean().default(false),
   isActive: z.boolean().default(true),
   sortOrder: z.number().int().default(0),
+  ordersDelivered: z.number().int().nonnegative().optional().default(850),
 });
 
 export const listProductsSchema = {

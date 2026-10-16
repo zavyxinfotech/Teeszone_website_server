@@ -18,24 +18,22 @@ type UpsertBody = {
   quote: string;
   author: string;
   product: string;
+  image?: string;
+  customerImage?: string;
+  verified?: boolean;
   isPublished: boolean;
   sortOrder: number;
 };
 
-const toAdminDTO = (row: {
-  id: string;
-  stars: number;
-  quote: string;
-  author: string;
-  productName: string;
-  isPublished: boolean;
-  sortOrder: number;
-}) => ({
+const toAdminDTO = (row: any) => ({
   id: row.id,
   stars: row.stars,
   quote: row.quote,
   author: row.author,
   product: row.productName,
+  image: row.customerImage || row.productImage || undefined,
+  customerImage: row.customerImage || undefined,
+  verified: true,
   isPublished: row.isPublished,
   sortOrder: row.sortOrder,
 });
@@ -69,8 +67,14 @@ class ReviewsController {
 
   create = async (req: FastifyRequest<{ Body: UpsertBody }>, reply: FastifyReply) => {
     try {
-      const { product, ...rest } = req.body;
-      const row = await client.review.create({ data: { ...rest, productName: product } });
+      const { product, image, customerImage, verified, ...rest } = req.body;
+      const row = await (client.review as any).create({
+        data: {
+          ...rest,
+          productName: product,
+          customerImage: customerImage || image || null,
+        },
+      });
       await cacheInvalidate();
       reply.status(201).send(fmt.formatResponse(toAdminDTO(row), "Review created"));
     } catch (error) {
@@ -93,10 +97,19 @@ class ReviewsController {
           description: `No review with id "${req.params.id}".`,
         });
       }
-      const { product, ...rest } = req.body;
-      const row = await client.review.update({
+      const { product, image, customerImage, verified, ...rest } = req.body;
+      const row = await (client.review as any).update({
         where: { id: existing.id },
-        data: { ...rest, productName: product },
+        data: {
+          ...rest,
+          productName: product,
+          customerImage:
+            customerImage !== undefined
+              ? customerImage
+              : image !== undefined
+              ? image
+              : (existing as any).customerImage,
+        },
       });
       await cacheInvalidate();
       reply.status(200).send(fmt.formatResponse(toAdminDTO(row), "Review updated"));

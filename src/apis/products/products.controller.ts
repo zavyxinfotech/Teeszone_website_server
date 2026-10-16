@@ -49,6 +49,7 @@ type UpsertBody = {
   megaSale: boolean;
   isActive: boolean;
   sortOrder: number;
+  ordersDelivered?: number;
 };
 
 async function writeProduct(body: UpsertBody, existingId?: string): Promise<string> {
@@ -98,6 +99,7 @@ async function writeProduct(body: UpsertBody, existingId?: string): Promise<stri
     megaSale: body.megaSale,
     isActive: body.isActive,
     sortOrder: body.sortOrder,
+    ordersDelivered: body.ordersDelivered != null ? Number(body.ordersDelivered) : 850,
   };
 
   const productId = await client.$transaction(async (tx) => {

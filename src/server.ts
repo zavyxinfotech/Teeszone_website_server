@@ -61,3 +61,4 @@ process.on("uncaughtException", (error) => {
 process.on("unhandledRejection", (reason) => {
   app.log.error(`unhandledRejection: ${reason}`);
 });
+

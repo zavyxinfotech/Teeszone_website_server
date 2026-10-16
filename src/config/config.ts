@@ -28,6 +28,9 @@ export default class Config {
   public s3_bucket_name: string;
   public s3_endpoint: string;
 
+  public razorpay_key_id: string;
+  public razorpay_key_secret: string;
+
   constructor(env: NodeJS.ProcessEnv) {
     const e = cleanEnv(env, {
       NODE_ENV: str({ choices: ["development", "production", "test"], default: "development" }),
@@ -56,6 +59,9 @@ export default class Config {
       AWS_REGION: str({ default: "ap-south-1" }),
       S3_BUCKET_NAME: str({ devDefault: "" }),
       S3_ENDPOINT: str({ devDefault: "" }),
+
+      RAZORPAY_KEY_ID: str({ devDefault: "" }),
+      RAZORPAY_KEY_SECRET: str({ devDefault: "" }),
     });
 
     this.env = e.NODE_ENV;
@@ -84,5 +90,8 @@ export default class Config {
     this.aws_region = e.AWS_REGION;
     this.s3_bucket_name = e.S3_BUCKET_NAME;
     this.s3_endpoint = e.S3_ENDPOINT;
+
+    this.razorpay_key_id = e.RAZORPAY_KEY_ID;
+    this.razorpay_key_secret = e.RAZORPAY_KEY_SECRET;
   }
 }

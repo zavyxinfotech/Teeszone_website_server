@@ -13,8 +13,12 @@ High-performance Fastify 5 REST API for the TeesZone e-commerce platform — man
 ## Recent Updates & Improvements
 
 1. **Admin Authentication**:
-   - Authorized Administrator Login: `teeszoneindia@gmail.com`
-   - Default seeded credentials configured for `teeszoneindia@gmail.com` / `teeszone@2025`.
+   - Authorized Administrator Logins:
+     1. `teeszoneindia@gmail.com` / `teeszone@2025`
+     2. `vijayadarshini@teeszone.in` / `tees@2026`
+     3. `archana@teeszone.in` / `tees@2026`
+     4. `nithyasri@teeszone.in` / `tees@2026`
+     5. `vasuki@zavyx.in` / `tees@2026`
 
 2. **Automated Catalog Pruning & Synchronization**:
    - `prisma/seed.ts` automatically aligns the MySQL database with storefront categories.
@@ -42,7 +46,7 @@ DB_PORT=3308
 DB_NAME=teeszone
 DB_USERNAME=root
 DB_PASSWORD=password
-ADMIN_EMAILS=teeszoneindia@gmail.com
+ADMIN_EMAILS=teeszoneindia@gmail.com,vijayadarshini@teeszone.in,archana@teeszone.in,nithyasri@teeszone.in,vasuki@zavyx.in
 ```
 
 ### 2. Install Dependencies & Generate Client

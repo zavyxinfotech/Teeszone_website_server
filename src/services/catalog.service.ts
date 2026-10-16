@@ -29,6 +29,7 @@ export interface ProductDTO {
   isNew: boolean;
   bestSeller: boolean;
   megaSale: boolean;
+  ordersDelivered?: number;
 }
 
 export interface CollectionDTO {
@@ -59,6 +60,9 @@ export interface ReviewDTO {
   quote: string;
   author: string;
   product: string;
+  image?: string;
+  customerImage?: string;
+  verified?: boolean;
 }
 
 type ProductRow = Selectable<ProductTable>;
@@ -159,6 +163,7 @@ async function hydrateProducts(rows: ProductRow[]): Promise<ProductDTO[]> {
       isNew,
       bestSeller,
       megaSale,
+      ordersDelivered: (row as any).ordersDelivered != null ? Number((row as any).ordersDelivered) : 850,
     };
   });
 }
@@ -360,10 +365,13 @@ export async function listReviews(): Promise<ReviewDTO[]> {
     .orderBy("sortOrder", "asc")
     .orderBy("id", "asc")
     .execute();
-  return rows.map((r) => ({
+  return rows.map((r: any) => ({
     stars: r.stars,
     quote: r.quote,
     author: r.author,
     product: r.productName,
+    image: r.customerImage || r.productImage || undefined,
+    customerImage: r.customerImage || undefined,
+    verified: true,
   }));
 }

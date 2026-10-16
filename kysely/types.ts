@@ -94,6 +94,7 @@ export type Product = {
     megaSale: Generated<number>;
     isActive: Generated<number>;
     sortOrder: Generated<number>;
+    ordersDelivered: Generated<number>;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
     deletedAt: Timestamp | null;
@@ -164,6 +165,8 @@ export type Review = {
     quote: string;
     author: string;
     productName: string;
+    customerImage: string | null;
+    productImage: string | null;
     isPublished: Generated<number>;
     sortOrder: Generated<number>;
     createdAt: Generated<Timestamp>;

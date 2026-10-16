@@ -6,6 +6,9 @@ export const reviewEntity = z.object({
   quote: z.string(),
   author: z.string(),
   product: z.string(),
+  image: z.string().optional(),
+  customerImage: z.string().optional(),
+  verified: z.boolean().optional(),
 });
 
 export const adminReviewEntity = reviewEntity.extend({
@@ -19,6 +22,9 @@ const upsertBody = z.object({
   quote: z.string().min(1),
   author: z.string().min(1),
   product: z.string().min(1),
+  image: z.string().optional(),
+  customerImage: z.string().optional(),
+  verified: z.boolean().optional(),
   isPublished: z.boolean().default(false),
   sortOrder: z.number().int().default(0),
 });

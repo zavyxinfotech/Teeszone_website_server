@@ -215,13 +215,14 @@ async function main() {
   // reviews
   for (const [i, r] of reviews.entries()) {
     const id = `seed-review-${i}`;
-    await client.review.upsert({
+    await (client.review as any).upsert({
       where: { id },
       update: {
         stars: r.stars,
         quote: r.quote,
         author: r.author,
         productName: r.product,
+        customerImage: (r as any).image ?? null,
         isPublished: true,
         sortOrder: i,
         deletedAt: null,
@@ -232,29 +233,39 @@ async function main() {
         quote: r.quote,
         author: r.author,
         productName: r.product,
+        customerImage: (r as any).image ?? null,
         isPublished: true,
         sortOrder: i,
       },
     });
   }
 
-  // admin user
-  const adminEmail = "teeszoneindia@gmail.com";
-  const adminPasswordHash = await hashPassword("teeszone@2025");
-  await client.user.upsert({
-    where: { email: adminEmail },
-    update: {
-      passwordHash: adminPasswordHash,
-      role: "ADMIN",
-      deletedAt: null,
-    },
-    create: {
-      email: adminEmail,
-      name: "Admin",
-      passwordHash: adminPasswordHash,
-      role: "ADMIN",
-    },
-  });
+  // admin users
+  const adminUsers = [
+    { email: "teeszoneindia@gmail.com", name: "Admin", password: "teeszone@2025" },
+    { email: "vijayadarshini@teeszone.in", name: "Vijayadarshini", password: "tees@2026" },
+    { email: "archana@teeszone.in", name: "Archana", password: "tees@2026" },
+    { email: "nithyasri@teeszone.in", name: "Nithyasri", password: "tees@2026" },
+    { email: "vasuki@zavyx.in", name: "Vasuki", password: "tees@2026" },
+  ];
+
+  for (const admin of adminUsers) {
+    const passwordHash = await hashPassword(admin.password);
+    await client.user.upsert({
+      where: { email: admin.email },
+      update: {
+        passwordHash,
+        role: "ADMIN",
+        deletedAt: null,
+      },
+      create: {
+        email: admin.email,
+        name: admin.name,
+        passwordHash,
+        role: "ADMIN",
+      },
+    });
+  }
 
   // summary
   const counts = {
