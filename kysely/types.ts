@@ -62,6 +62,15 @@ export type Fabric = {
     updatedAt: Timestamp;
     deletedAt: Timestamp | null;
 };
+export type HomeContent = {
+    id: Generated<string>;
+    hero: unknown;
+    shopByRange: unknown;
+    fabricLibrary: unknown;
+    processSteps: unknown;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
 export type NewsletterSubscriber = {
     id: string;
     email: string;
@@ -210,6 +219,7 @@ export type DB = {
     Collection: Collection;
     Enquiry: Enquiry;
     Fabric: Fabric;
+    HomeContent: HomeContent;
     NewsletterSubscriber: NewsletterSubscriber;
     PasswordResetToken: PasswordResetToken;
     Product: Product;

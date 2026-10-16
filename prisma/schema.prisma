@@ -341,3 +341,13 @@ model Address {
 
   @@index([userId])
 }
+
+model HomeContent {
+  id            String   @id @default("homepage") @db.VarChar(191)
+  hero          Json
+  shopByRange   Json
+  fabricLibrary Json
+  processSteps  Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
