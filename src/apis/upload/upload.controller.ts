@@ -41,6 +41,23 @@ const sendError = (reply: FastifyReply, error: any) => {
 const reject = (message: string, description?: string) =>
   new BadRequestException({ message, description });
 
+const mediaCache = new Map<string, { buffer: Buffer; contentType: string }>();
+let cachedS3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!cachedS3Client) {
+    cachedS3Client = new S3Client({
+      region: config.aws_region,
+      endpoint: config.s3_endpoint,
+      credentials: {
+        accessKeyId: config.aws_access_key_id,
+        secretAccessKey: config.aws_secret_access_key,
+      },
+    });
+  }
+  return cachedS3Client;
+}
+
 class UploadController {
   image = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
@@ -171,15 +188,15 @@ class UploadController {
       const key = params["*"] || "";
       if (!key) return reply.status(404).send("Not found");
 
-      const s3 = new S3Client({
-        region: config.aws_region,
-        endpoint: config.s3_endpoint,
-        credentials: {
-          accessKeyId: config.aws_access_key_id,
-          secretAccessKey: config.aws_secret_access_key,
-        },
-      });
+      if (mediaCache.has(key)) {
+        const cached = mediaCache.get(key)!;
+        reply.header("Content-Type", cached.contentType);
+        reply.header("Cache-Control", "public, max-age=31536000, immutable");
+        reply.header("Access-Control-Allow-Origin", "*");
+        return reply.send(cached.buffer);
+      }
 
+      const s3 = getS3Client();
       const res = await s3.send(
         new GetObjectCommand({
           Bucket: config.s3_bucket_name,
@@ -191,9 +208,24 @@ class UploadController {
         return reply.status(404).send("Image not found");
       }
 
-      reply.header("Content-Type", res.ContentType || "image/webp");
+      const chunks: Uint8Array[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for await (const chunk of res.Body as any) {
+        chunks.push(chunk);
+      }
+      const buffer = Buffer.concat(chunks);
+      const contentType = res.ContentType || "image/webp";
+
+      if (mediaCache.size >= 100) {
+        const firstKey = mediaCache.keys().next().value;
+        if (firstKey) mediaCache.delete(firstKey);
+      }
+      mediaCache.set(key, { buffer, contentType });
+
+      reply.header("Content-Type", contentType);
       reply.header("Cache-Control", "public, max-age=31536000, immutable");
-      return reply.send(res.Body);
+      reply.header("Access-Control-Allow-Origin", "*");
+      return reply.send(buffer);
     } catch (err) {
       return reply.status(404).send("Image not found");
     }
