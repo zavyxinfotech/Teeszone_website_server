@@ -30,6 +30,7 @@ export interface ProductDTO {
   bestSeller: boolean;
   megaSale: boolean;
   ordersDelivered?: number;
+  sizeChartImage?: string | null;
 }
 
 export interface CollectionDTO {
@@ -164,6 +165,7 @@ async function hydrateProducts(rows: ProductRow[]): Promise<ProductDTO[]> {
       bestSeller,
       megaSale,
       ordersDelivered: (row as any).ordersDelivered != null ? Number((row as any).ordersDelivered) : 850,
+      sizeChartImage: (row as any).sizeChartImage ?? null,
     };
   });
 }

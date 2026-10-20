@@ -11,6 +11,7 @@ import {
   getProductSchema,
   listProductsSchema,
   updateProductSchema,
+  updateSizeChartSchema,
 } from "./products.schema";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,6 +52,13 @@ const routes: IRouteOptions<any>[] = [
     schema: deleteProductSchema,
     preHandler: [authMiddleware, adminMiddleware],
     handler: productsController.remove,
+  },
+  {
+    url: "/admin/:id/size-chart",
+    method: API_METHODS.PUT,
+    schema: updateSizeChartSchema,
+    preHandler: [authMiddleware, adminMiddleware],
+    handler: productsController.updateSizeChart,
   },
 ];
 

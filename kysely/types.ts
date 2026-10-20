@@ -104,6 +104,7 @@ export type Product = {
     isActive: Generated<number>;
     sortOrder: Generated<number>;
     ordersDelivered: Generated<number>;
+    sizeChartImage: string | null;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
     deletedAt: Timestamp | null;

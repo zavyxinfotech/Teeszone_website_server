@@ -50,6 +50,7 @@ type UpsertBody = {
   isActive: boolean;
   sortOrder: number;
   ordersDelivered?: number;
+  sizeChartImage?: string | null;
 };
 
 async function writeProduct(body: UpsertBody, existingId?: string): Promise<string> {
@@ -100,6 +101,7 @@ async function writeProduct(body: UpsertBody, existingId?: string): Promise<stri
     isActive: body.isActive,
     sortOrder: body.sortOrder,
     ordersDelivered: body.ordersDelivered != null ? Number(body.ordersDelivered) : 850,
+    sizeChartImage: body.sizeChartImage !== undefined ? body.sizeChartImage : null,
   };
 
   const productId = await client.$transaction(async (tx) => {
@@ -311,6 +313,38 @@ class ProductsController {
 
       await cacheInvalidate();
       reply.status(200).send(fmt.formatResponse({ deleted: true }, "Product deleted"));
+    } catch (error) {
+      captureRequestError(error, req);
+      sendError(reply, error);
+    }
+  };
+
+  updateSizeChart = async (
+    req: FastifyRequest<{
+      Params: { id: string };
+      Body: { sizeChartImage: string | null };
+    }>,
+    reply: FastifyReply,
+  ) => {
+    try {
+      const existing = await client.product.findFirst({
+        where: { id: req.params.id, deletedAt: null },
+      });
+      if (!existing) {
+        throw new NotFoundException({
+          message: "Product not found",
+          description: `No product with id "${req.params.id}".`,
+        });
+      }
+
+      await client.product.update({
+        where: { id: existing.id },
+        data: { sizeChartImage: req.body.sizeChartImage },
+      });
+
+      await cacheInvalidate();
+      const product = await getProductBySlug(existing.slug);
+      reply.status(200).send(fmt.formatResponse(product, "Product size chart updated"));
     } catch (error) {
       captureRequestError(error, req);
       sendError(reply, error);

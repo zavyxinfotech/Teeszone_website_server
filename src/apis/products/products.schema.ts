@@ -31,6 +31,7 @@ export const productEntity = z.object({
   bestSeller: z.boolean(),
   megaSale: z.boolean(),
   ordersDelivered: z.number().optional().nullable(),
+  sizeChartImage: z.string().optional().nullable(),
 });
 
 export const adminProductEntity = productEntity.extend({
@@ -74,6 +75,7 @@ const upsertBody = z.object({
   isActive: z.boolean().default(true),
   sortOrder: z.number().int().default(0),
   ordersDelivered: z.number().int().nonnegative().optional().default(850),
+  sizeChartImage: z.string().optional().nullable(),
 });
 
 export const listProductsSchema = {
@@ -136,4 +138,14 @@ export const deleteProductSchema = {
   security: [{ ApiToken: [] }],
   params: z.object({ id: z.string() }),
   response: { 200: envelope(z.object({ deleted: z.boolean() })) },
+};
+
+export const updateSizeChartSchema = {
+  description: "Admin: update size chart image for a product",
+  tags: ["Admin"],
+  summary: "Update size chart image",
+  security: [{ ApiToken: [] }],
+  params: z.object({ id: z.string() }),
+  body: z.object({ sizeChartImage: z.string().nullable() }),
+  response: { 200: envelope(productEntity) },
 };
