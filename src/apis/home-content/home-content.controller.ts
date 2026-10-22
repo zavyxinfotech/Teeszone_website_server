@@ -40,9 +40,9 @@ export const defaultHomeContent = {
       image: "/products/crew-white.svg",
     },
     tiles: [
-      { title: "Men", href: "/collections/mens-rn-half-180", image: "/products/crew-black.svg", buttonText: "Shop now", sale: false },
-      { title: "Women", href: "/collections/womens-rn-half-180", image: "/products/crew-white.svg", buttonText: "Shop now", sale: false },
-      { title: "Kids", href: "/collections/kids-rn-half-180", image: "/products/jersey-red.svg", buttonText: "Shop now", sale: false },
+      { title: "Men", href: "/collections/mens-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/dropdown/mens_dropdown_img.webp", buttonText: "Shop now", sale: false },
+      { title: "Women", href: "/collections/womens-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/dropdown/womens_dropdown_img.webp", buttonText: "Shop now", sale: false },
+      { title: "Kids", href: "/collections/kids-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/dropdown/kids_dropdown_img.webp", buttonText: "Shop now", sale: false },
       { title: "Mega Sale", href: "/collections/mega-sale", image: "/products/tee-yellow.svg", buttonText: "Shop now", sale: true },
     ],
   },
