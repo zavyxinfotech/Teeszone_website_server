@@ -37,13 +37,13 @@ export const defaultHomeContent = {
       text: "Premium zip and non-zip hoodies — warm, durable and retail-grade.",
       href: "/collections/unisex-hoodie-zip-325",
       buttonText: "Shop Hoodies",
-      image: "/products/crew-white.svg",
+      image: "http://localhost:4010/api/upload/media/teeszone/shop-by-range/shop_by_range_hoodies.webp",
     },
     tiles: [
-      { title: "Men", href: "/collections/mens-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/dropdown/mens_dropdown_img.webp", buttonText: "Shop now", sale: false },
-      { title: "Women", href: "/collections/womens-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/dropdown/womens_dropdown_img.webp", buttonText: "Shop now", sale: false },
-      { title: "Kids", href: "/collections/kids-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/dropdown/kids_dropdown_img.webp", buttonText: "Shop now", sale: false },
-      { title: "Mega Sale", href: "/collections/mega-sale", image: "/products/tee-yellow.svg", buttonText: "Shop now", sale: true },
+      { title: "Men", href: "/collections/mens-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/shop-by-range/shop_by_range_men.webp", buttonText: "Shop now", sale: false },
+      { title: "Women", href: "/collections/womens-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/shop-by-range/shop_by_range_women.webp", buttonText: "Shop now", sale: false },
+      { title: "Kids", href: "/collections/kids-rn-half-180", image: "http://localhost:4010/api/upload/media/teeszone/shop-by-range/shop_by_range_kids.webp", buttonText: "Shop now", sale: false },
+      { title: "Mega Sale", href: "/collections/mega-sale", image: "http://localhost:4010/api/upload/media/teeszone/shop-by-range/shop_by_range_mega_sale.webp", buttonText: "Shop now", sale: true },
     ],
   },
   fabricLibrary: {
