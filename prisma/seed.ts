@@ -152,6 +152,11 @@ async function main() {
         name: c.name,
         hex: c.hex,
         image: c.image,
+        backImage: c.backImage ?? null,
+        chestImage: c.chestImage ?? null,
+        detailImage: c.detailImage ?? null,
+        image4: c.image4 ?? null,
+        image5: c.image5 ?? null,
         sortOrder: i,
       })),
     });
