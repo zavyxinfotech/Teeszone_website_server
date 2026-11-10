@@ -35,6 +35,20 @@ export type Collection = {
     updatedAt: Timestamp;
     deletedAt: Timestamp | null;
 };
+export type CustomerActivity = {
+    id: string;
+    userId: string | null;
+    userName: string | null;
+    userEmail: string | null;
+    activityType: string;
+    productId: string | null;
+    productName: string | null;
+    orderId: string | null;
+    status: Generated<string>;
+    details: unknown | null;
+    ipAddress: string | null;
+    createdAt: Generated<Timestamp>;
+};
 export type Enquiry = {
     id: string;
     name: string;
@@ -222,9 +236,59 @@ export type User = {
     updatedAt: Timestamp;
     deletedAt: Timestamp | null;
 };
+export type UserCartItem = {
+    id: string;
+    userId: string;
+    itemKey: string;
+    slug: string;
+    name: string;
+    image: string;
+    colorName: string;
+    colorHex: string;
+    size: string;
+    qty: Generated<number>;
+    customNote: string | null;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type UserCustomDesign = {
+    id: string;
+    userId: string;
+    productSlug: string;
+    productName: string;
+    colorName: string;
+    colorHex: string | null;
+    companyName: string | null;
+    logoUrl: string | null;
+    logoName: string | null;
+    frontPreviewUrl: string | null;
+    backPreviewUrl: string | null;
+    printLocation: string | null;
+    embroideryNotes: string | null;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type UserOrder = {
+    id: string;
+    orderNumber: string;
+    userId: string | null;
+    userName: string | null;
+    userEmail: string | null;
+    userPhone: string | null;
+    razorpayOrderId: string | null;
+    razorpayPaymentId: string | null;
+    amount: number;
+    currency: Generated<string>;
+    status: Generated<string>;
+    items: unknown;
+    shippingAddress: unknown | null;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
 export type DB = {
     Address: Address;
     Collection: Collection;
+    customeractivity: CustomerActivity;
     Enquiry: Enquiry;
     Fabric: Fabric;
     HomeContent: HomeContent;
@@ -242,4 +306,7 @@ export type DB = {
     Segment: Segment;
     SegmentGroup: SegmentGroup;
     User: User;
+    usercartitem: UserCartItem;
+    usercustomdesign: UserCustomDesign;
+    userorder: UserOrder;
 };

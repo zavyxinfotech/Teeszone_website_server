@@ -305,9 +305,12 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  addresses   Address[]
-  resetTokens PasswordResetToken[]
-  likes       ProductLike[]
+  addresses     Address[]
+  resetTokens   PasswordResetToken[]
+  likes         ProductLike[]
+  cartItems     UserCartItem[]
+  customDesigns UserCustomDesign[]
+  orders        UserOrder[]
 }
 
 model PasswordResetToken {
@@ -367,4 +370,94 @@ model ProductLike {
   @@index([userId])
   @@index([productSlug])
   @@map("productlike")
+}
+
+model UserCartItem {
+  id         String   @id @default(uuid()) @db.VarChar(191)
+  userId     String   @db.VarChar(191)
+  itemKey    String   @db.VarChar(255)
+  slug       String   @db.VarChar(191)
+  name       String   @db.VarChar(255)
+  image      String   @db.Text
+  colorName  String   @db.VarChar(100)
+  colorHex   String   @db.VarChar(32)
+  size       String   @db.VarChar(32)
+  qty        Int      @default(1)
+  customNote String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemKey])
+  @@index([userId])
+  @@map("usercartitem")
+}
+
+model UserCustomDesign {
+  id              String   @id @default(uuid()) @db.VarChar(191)
+  userId          String   @db.VarChar(191)
+  productSlug     String   @db.VarChar(191)
+  productName     String   @db.VarChar(255)
+  colorName       String   @db.VarChar(100)
+  colorHex        String?  @db.VarChar(32)
+  companyName     String?  @db.VarChar(255)
+  logoUrl         String?  @db.Text
+  logoName        String?  @db.VarChar(255)
+  frontPreviewUrl String?  @db.Text
+  backPreviewUrl  String?  @db.Text
+  printLocation   String?  @db.VarChar(100)
+  embroideryNotes String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([productSlug])
+  @@map("usercustomdesign")
+}
+
+model CustomerActivity {
+  id           String   @id @default(uuid()) @db.VarChar(191)
+  userId       String?  @db.VarChar(191)
+  userName     String?  @db.VarChar(255)
+  userEmail    String?  @db.VarChar(255)
+  activityType String   @db.VarChar(64)
+  productId    String?  @db.VarChar(191)
+  productName  String?  @db.VarChar(255)
+  orderId      String?  @db.VarChar(191)
+  status       String   @default("COMPLETED") @db.VarChar(64)
+  details      Json?
+  ipAddress    String?  @db.VarChar(64)
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([activityType])
+  @@index([createdAt])
+  @@map("customeractivity")
+}
+
+model UserOrder {
+  id                String   @id @default(uuid()) @db.VarChar(191)
+  orderNumber       String   @unique @db.VarChar(100)
+  userId            String?  @db.VarChar(191)
+  userName          String?  @db.VarChar(255)
+  userEmail         String?  @db.VarChar(255)
+  userPhone         String?  @db.VarChar(50)
+  razorpayOrderId   String?  @db.VarChar(191)
+  razorpayPaymentId String?  @db.VarChar(191)
+  amount            Int
+  currency          String   @default("INR") @db.VarChar(10)
+  status            String   @default("PAID") @db.VarChar(50)
+  items             Json
+  shippingAddress   Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("userorder")
 }
