@@ -5,11 +5,13 @@ import { NotFoundException } from "../../exception/notfound.exception";
 import { cacheGet, cacheInvalidate, cacheSet } from "../../services/cache.service";
 import { deleteS3Objects } from "../../services/s3.service";
 import {
+  getColorModels,
   getProductById,
   getProductBySlug,
   isVirtualSlug,
   listProducts,
   ProductDTO,
+  upsertColorModel,
 } from "../../services/catalog.service";
 import { captureRequestError } from "../../utils/error-tracking";
 import client from "../../utils/prisma";
@@ -345,6 +347,43 @@ class ProductsController {
       await cacheInvalidate();
       const product = await getProductBySlug(existing.slug);
       reply.status(200).send(fmt.formatResponse(product, "Product size chart updated"));
+    } catch (error) {
+      captureRequestError(error, req);
+      sendError(reply, error);
+    }
+  };
+
+  getColorModels = async (req: FastifyRequest<{ Params: { slug: string } }>, reply: FastifyReply) => {
+    try {
+      const models = await getColorModels(req.params.slug);
+      reply.status(200).send(fmt.formatResponse(models));
+    } catch (error) {
+      captureRequestError(error, req);
+      sendError(reply, error);
+    }
+  };
+
+  saveColorModel = async (
+    req: FastifyRequest<{
+      Params: { slug: string };
+      Body: {
+        colorName: string;
+        colorHex: string;
+        modelImageUrl: string;
+        modelBackImageUrl?: string | null;
+        s3ObjectKey?: string | null;
+        isActive?: boolean;
+      };
+    }>,
+    reply: FastifyReply
+  ) => {
+    try {
+      const result = await upsertColorModel({
+        slug: req.params.slug,
+        ...req.body,
+      });
+      await cacheInvalidate();
+      reply.status(200).send(fmt.formatResponse(result, "3D Model updated successfully"));
     } catch (error) {
       captureRequestError(error, req);
       sendError(reply, error);

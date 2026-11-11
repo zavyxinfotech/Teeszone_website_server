@@ -1,6 +1,19 @@
 import { Selectable } from "kysely";
 import { Product as ProductTable } from "../../kysely/types";
 import { db } from "../utils/kysely";
+import client from "../utils/prisma";
+
+export interface ProductColorModelDTO {
+  id: string;
+  productId: string;
+  productColorId?: string | null;
+  colorName: string;
+  colorHex: string;
+  modelImageUrl: string;
+  modelBackImageUrl?: string | null;
+  s3ObjectKey?: string | null;
+  isActive: boolean;
+}
 
 export interface ProductDTO {
   id: string;
@@ -23,6 +36,7 @@ export interface ProductDTO {
     image4?: string | null;
     image5?: string | null;
   }[];
+  colorModels?: ProductColorModelDTO[];
   sizes: string[];
   qtyDiscounts: { minQty: number; offPct: number }[];
   features: string[];
@@ -32,6 +46,49 @@ export interface ProductDTO {
   ordersDelivered?: number;
   sizeChartImage?: string | null;
 }
+
+export const DEFAULT_AEROSOFT_3D_MODELS: ProductColorModelDTO[] = [
+  {
+    id: "pcm-aerosoft-black",
+    productId: "p-aerosoft-polo-200",
+    colorName: "Black",
+    colorHex: "#26282D",
+    modelImageUrl: "/products/polo-black-front-3d.png",
+    modelBackImageUrl: "/products/polo-black-back-3d.png",
+    s3ObjectKey: "products/aerosoft-polo-200/3d-models/black/front.png",
+    isActive: true,
+  },
+  {
+    id: "pcm-aerosoft-white",
+    productId: "p-aerosoft-polo-200",
+    colorName: "White",
+    colorHex: "#FFFFFF",
+    modelImageUrl: "/products/polo-white-front-3d.png",
+    modelBackImageUrl: "/products/polo-white-back-3d.png",
+    s3ObjectKey: "products/aerosoft-polo-200/3d-models/white/front.png",
+    isActive: true,
+  },
+  {
+    id: "pcm-aerosoft-true-navy",
+    productId: "p-aerosoft-polo-200",
+    colorName: "True Navy",
+    colorHex: "#3F5277",
+    modelImageUrl: "/products/polo-true-navy-front-3d.png",
+    modelBackImageUrl: "/products/polo-true-navy-back-3d.png",
+    s3ObjectKey: "products/aerosoft-polo-200/3d-models/true-navy/front.png",
+    isActive: true,
+  },
+  {
+    id: "pcm-aerosoft-light-grey",
+    productId: "p-aerosoft-polo-200",
+    colorName: "Light Grey Melange",
+    colorHex: "#CCCAC9",
+    modelImageUrl: "/products/polo-light-grey-front-3d.png",
+    modelBackImageUrl: "/products/polo-light-grey-back-3d.png",
+    s3ObjectKey: "products/aerosoft-polo-200/3d-models/light-grey-melange/front.png",
+    isActive: true,
+  },
+];
 
 export interface CollectionDTO {
   slug: string;
@@ -175,6 +232,7 @@ async function hydrateProducts(rows: ProductRow[]): Promise<ProductDTO[]> {
       mrp,
       price,
       colors: colorsBy.get(row.id) ?? [],
+      colorModels: row.slug === "aerosoft-polo-200" ? DEFAULT_AEROSOFT_3D_MODELS : [],
       sizes: (row.sizes as unknown as string[]) ?? [],
       qtyDiscounts: tiersBy.get(row.id) ?? [],
       features: (row.features as unknown as string[]) ?? [],
@@ -393,4 +451,98 @@ export async function listReviews(): Promise<ReviewDTO[]> {
     customerImage: r.customerImage || undefined,
     verified: true,
   }));
+}
+
+// ---------- 3D Garment Models ----------
+
+export async function getColorModels(slug: string): Promise<ProductColorModelDTO[]> {
+  try {
+    const product = await db
+      .selectFrom("Product")
+      .select(["id", "slug"])
+      .where("slug", "=", slug)
+      .where("deletedAt", "is", null)
+      .executeTakeFirst();
+    if (!product) return [];
+
+    const models = await (client as any).productColorModel?.findMany?.({
+      where: { productId: product.id, isActive: true },
+    });
+
+    if (models && models.length > 0) {
+      return models.map((m: any) => ({
+        id: m.id,
+        productId: m.productId,
+        productColorId: m.productColorId,
+        colorName: m.colorName,
+        colorHex: m.colorHex,
+        modelImageUrl: m.modelImageUrl,
+        modelBackImageUrl: m.modelBackImageUrl,
+        s3ObjectKey: m.s3ObjectKey,
+        isActive: m.isActive,
+      }));
+    }
+  } catch {
+    // Fallback to defaults
+  }
+
+  if (slug === "aerosoft-polo-200") {
+    return DEFAULT_AEROSOFT_3D_MODELS;
+  }
+  return [];
+}
+
+export async function upsertColorModel(data: {
+  slug: string;
+  colorName: string;
+  colorHex: string;
+  modelImageUrl: string;
+  modelBackImageUrl?: string | null;
+  s3ObjectKey?: string | null;
+  isActive?: boolean;
+}): Promise<ProductColorModelDTO> {
+  const product = await db
+    .selectFrom("Product")
+    .select(["id", "slug"])
+    .where("slug", "=", data.slug)
+    .where("deletedAt", "is", null)
+    .executeTakeFirst();
+  if (!product) throw new Error("Product not found");
+
+  const row = await (client as any).productColorModel.upsert({
+    where: {
+      productId_colorName: {
+        productId: product.id,
+        colorName: data.colorName,
+      },
+    },
+    update: {
+      colorHex: data.colorHex,
+      modelImageUrl: data.modelImageUrl,
+      modelBackImageUrl: data.modelBackImageUrl,
+      s3ObjectKey: data.s3ObjectKey,
+      isActive: data.isActive ?? true,
+    },
+    create: {
+      productId: product.id,
+      colorName: data.colorName,
+      colorHex: data.colorHex,
+      modelImageUrl: data.modelImageUrl,
+      modelBackImageUrl: data.modelBackImageUrl,
+      s3ObjectKey: data.s3ObjectKey,
+      isActive: data.isActive ?? true,
+    },
+  });
+
+  return {
+    id: row.id,
+    productId: row.productId,
+    productColorId: row.productColorId,
+    colorName: row.colorName,
+    colorHex: row.colorHex,
+    modelImageUrl: row.modelImageUrl,
+    modelBackImageUrl: row.modelBackImageUrl,
+    s3ObjectKey: row.s3ObjectKey,
+    isActive: row.isActive,
+  };
 }

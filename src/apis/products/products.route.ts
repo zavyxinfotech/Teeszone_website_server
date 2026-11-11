@@ -60,6 +60,17 @@ const routes: IRouteOptions<any>[] = [
     preHandler: [authMiddleware, adminMiddleware],
     handler: productsController.updateSizeChart,
   },
+  {
+    url: "/:slug/3d-models",
+    method: API_METHODS.GET,
+    handler: productsController.getColorModels,
+  },
+  {
+    url: "/:slug/3d-models",
+    method: API_METHODS.POST,
+    preHandler: [authMiddleware, adminMiddleware],
+    handler: productsController.saveColorModel,
+  },
 ];
 
 export default routes;

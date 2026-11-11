@@ -146,6 +146,19 @@ export type ProductColor = {
     updatedAt: Timestamp;
     deletedAt: Timestamp | null;
 };
+export type ProductColorModel = {
+    id: string;
+    product_id: string;
+    product_colour_id: string | null;
+    colour_name: string;
+    colour_hex: string;
+    model_image_url: string;
+    model_back_image_url: string | null;
+    s3_object_key: string | null;
+    is_active: Generated<number>;
+    created_at: Generated<Timestamp>;
+    updated_at: Timestamp;
+};
 export type ProductLike = {
     id: string;
     userId: string;
@@ -295,6 +308,7 @@ export type DB = {
     NewsletterSubscriber: NewsletterSubscriber;
     PasswordResetToken: PasswordResetToken;
     Product: Product;
+    product_color_model: ProductColorModel;
     ProductCollection: ProductCollection;
     ProductColor: ProductColor;
     productlike: ProductLike;
