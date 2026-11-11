@@ -7,3 +7,4 @@ export default async (fastify: FastifyInstance) => {
     fastify.route(route as unknown as RouteOptions);
   }
 };
+

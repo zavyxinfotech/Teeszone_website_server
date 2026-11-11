@@ -37,3 +37,4 @@ sql += '  `sort_order` = VALUES(`sort_order`);\n';
 
 fs.writeFileSync('prisma/customization_color_models.sql', sql);
 console.log('Generated prisma/customization_color_models.sql with', colors.length, 'colors');
+

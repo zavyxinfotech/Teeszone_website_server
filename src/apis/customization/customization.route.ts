@@ -54,3 +54,4 @@ const routes: IRouteOptions<any>[] = [
 ];
 
 export default routes;
+

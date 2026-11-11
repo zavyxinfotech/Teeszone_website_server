@@ -52,3 +52,4 @@ export const adminUpload3DModelSchema = {
   tags: ["Customization 3D Models"],
   summary: "Admin: upload 3D model PNG to S3",
 };
+
