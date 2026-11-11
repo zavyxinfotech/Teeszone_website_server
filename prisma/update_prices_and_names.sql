@@ -63,3 +63,50 @@ ON DUPLICATE KEY UPDATE
   `model_back_image_url` = VALUES(`model_back_image_url`),
   `s3_object_key` = VALUES(`s3_object_key`),
   `is_active` = VALUES(`is_active`);
+-- TeesZone Customization 3D Color Models Migration
+CREATE TABLE IF NOT EXISTS `customization_color_model` (
+  `id` VARCHAR(191) NOT NULL,
+  `colour_name` VARCHAR(64) NOT NULL UNIQUE,
+  `colour_slug` VARCHAR(64) NOT NULL UNIQUE,
+  `colour_hex` VARCHAR(9) NOT NULL,
+  `model_image_url` TEXT NOT NULL,
+  `model_back_image_url` TEXT NULL,
+  `s3_front_key` VARCHAR(255) NULL,
+  `s3_back_key` VARCHAR(255) NULL,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `customization_color_model_colour_slug_idx` (`colour_slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `customization_color_model` (`id`, `colour_name`, `colour_slug`, `colour_hex`, `model_image_url`, `model_back_image_url`, `s3_front_key`, `s3_back_key`, `is_active`, `sort_order`)
+VALUES
+  ('ccm-white', 'White', 'white', '#FFFFFF', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/white/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/white/back.png', 'teeszone/customization/tshirts/white/front.png', 'teeszone/customization/tshirts/white/back.png', 1, 0),
+  ('ccm-black', 'Black', 'black', '#26282D', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/black/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/black/back.png', 'teeszone/customization/tshirts/black/front.png', 'teeszone/customization/tshirts/black/back.png', 1, 1),
+  ('ccm-light-grey-melange', 'Light Grey Melange', 'light-grey-melange', '#CCCAC9', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/light-grey-melange/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/light-grey-melange/back.png', 'teeszone/customization/tshirts/light-grey-melange/front.png', 'teeszone/customization/tshirts/light-grey-melange/back.png', 1, 2),
+  ('ccm-carbon-grey-melange', 'Carbon Grey Melange', 'carbon-grey-melange', '#767873', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/carbon-grey-melange/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/carbon-grey-melange/back.png', 'teeszone/customization/tshirts/carbon-grey-melange/front.png', 'teeszone/customization/tshirts/carbon-grey-melange/back.png', 1, 3),
+  ('ccm-olive', 'Olive', 'olive', '#808000', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/olive/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/olive/back.png', 'teeszone/customization/tshirts/olive/front.png', 'teeszone/customization/tshirts/olive/back.png', 1, 4),
+  ('ccm-pine-green', 'Pine Green', 'pine-green', '#01796F', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/pine-green/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/pine-green/back.png', 'teeszone/customization/tshirts/pine-green/front.png', 'teeszone/customization/tshirts/pine-green/back.png', 1, 5),
+  ('ccm-arrow-red', 'Arrow Red', 'arrow-red', '#FF0000', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/arrow-red/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/arrow-red/back.png', 'teeszone/customization/tshirts/arrow-red/front.png', 'teeszone/customization/tshirts/arrow-red/back.png', 1, 6),
+  ('ccm-imperial-blue', 'Imperial Blue', 'imperial-blue', '#002395', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/imperial-blue/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/imperial-blue/back.png', 'teeszone/customization/tshirts/imperial-blue/front.png', 'teeszone/customization/tshirts/imperial-blue/back.png', 1, 7),
+  ('ccm-rama-blue', 'Rama Blue', 'rama-blue', '#4290F6', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/rama-blue/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/rama-blue/back.png', 'teeszone/customization/tshirts/rama-blue/front.png', 'teeszone/customization/tshirts/rama-blue/back.png', 1, 8),
+  ('ccm-black-melange', 'Black Melange', 'black-melange', '#1C1C1C', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/black-melange/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/black-melange/back.png', 'teeszone/customization/tshirts/black-melange/front.png', 'teeszone/customization/tshirts/black-melange/back.png', 1, 9),
+  ('ccm-berige', 'Berige', 'berige', '#C0362D', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/berige/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/berige/back.png', 'teeszone/customization/tshirts/berige/front.png', 'teeszone/customization/tshirts/berige/back.png', 1, 10),
+  ('ccm-aluminium', 'Aluminium', 'aluminium', '#848789', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/aluminium/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/aluminium/back.png', 'teeszone/customization/tshirts/aluminium/front.png', 'teeszone/customization/tshirts/aluminium/back.png', 1, 11),
+  ('ccm-mint', 'Mint', 'mint', '#3EB489', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/mint/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/mint/back.png', 'teeszone/customization/tshirts/mint/front.png', 'teeszone/customization/tshirts/mint/back.png', 1, 12),
+  ('ccm-french-wine', 'French Wine', 'french-wine', '#AC1E44', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/french-wine/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/french-wine/back.png', 'teeszone/customization/tshirts/french-wine/front.png', 'teeszone/customization/tshirts/french-wine/back.png', 1, 13),
+  ('ccm-emerald-green', 'Emerald Green', 'emerald-green', '#50C878', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/emerald-green/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/emerald-green/back.png', 'teeszone/customization/tshirts/emerald-green/front.png', 'teeszone/customization/tshirts/emerald-green/back.png', 1, 14),
+  ('ccm-chrome-yellow', 'Chrome Yellow', 'chrome-yellow', '#FFA700', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/chrome-yellow/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/chrome-yellow/back.png', 'teeszone/customization/tshirts/chrome-yellow/front.png', 'teeszone/customization/tshirts/chrome-yellow/back.png', 1, 15),
+  ('ccm-woody-orange', 'Woody Orange', 'woody-orange', '#B74D20', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/woody-orange/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/woody-orange/back.png', 'teeszone/customization/tshirts/woody-orange/front.png', 'teeszone/customization/tshirts/woody-orange/back.png', 1, 16),
+  ('ccm-blue-melange', 'Blue Melange', 'blue-melange', '#3B5998', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/blue-melange/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/blue-melange/back.png', 'teeszone/customization/tshirts/blue-melange/front.png', 'teeszone/customization/tshirts/blue-melange/back.png', 1, 17),
+  ('ccm-navy-melange', 'Navy Melange', 'navy-melange', '#28334A', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/navy-melange/front.png', 'https://teeszone-catalogue-images-2026.s3.ap-southeast-2.amazonaws.com/teeszone/customization/tshirts/navy-melange/back.png', 'teeszone/customization/tshirts/navy-melange/front.png', 'teeszone/customization/tshirts/navy-melange/back.png', 1, 18)
+ON DUPLICATE KEY UPDATE
+  `colour_hex` = VALUES(`colour_hex`),
+  `model_image_url` = VALUES(`model_image_url`),
+  `model_back_image_url` = VALUES(`model_back_image_url`),
+  `s3_front_key` = VALUES(`s3_front_key`),
+  `s3_back_key` = VALUES(`s3_back_key`),
+  `is_active` = VALUES(`is_active`),
+  `sort_order` = VALUES(`sort_order`);

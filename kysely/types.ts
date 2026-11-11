@@ -49,6 +49,20 @@ export type CustomerActivity = {
     ipAddress: string | null;
     createdAt: Generated<Timestamp>;
 };
+export type CustomizationColorModel = {
+    id: string;
+    colour_name: string;
+    colour_slug: string;
+    colour_hex: string;
+    model_image_url: string;
+    model_back_image_url: string | null;
+    s3_front_key: string | null;
+    s3_back_key: string | null;
+    is_active: Generated<number>;
+    sort_order: Generated<number>;
+    created_at: Generated<Timestamp>;
+    updated_at: Timestamp;
+};
 export type Enquiry = {
     id: string;
     name: string;
@@ -302,6 +316,7 @@ export type DB = {
     Address: Address;
     Collection: Collection;
     customeractivity: CustomerActivity;
+    customization_color_model: CustomizationColorModel;
     Enquiry: Enquiry;
     Fabric: Fabric;
     HomeContent: HomeContent;

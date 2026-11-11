@@ -156,6 +156,24 @@ model ProductColorModel {
   @@map("product_color_model")
 }
 
+model CustomizationColorModel {
+  id                String   @id @default(uuid()) @db.VarChar(191)
+  colorName         String   @unique @map("colour_name") @db.VarChar(64)
+  colorSlug         String   @unique @map("colour_slug") @db.VarChar(64)
+  colorHex          String   @map("colour_hex") @db.VarChar(9)
+  modelImageUrl     String   @map("model_image_url") @db.Text
+  modelBackImageUrl String?  @map("model_back_image_url") @db.Text
+  s3FrontKey        String?  @map("s3_front_key") @db.VarChar(255)
+  s3BackKey         String?  @map("s3_back_key") @db.VarChar(255)
+  isActive          Boolean  @default(true) @map("is_active")
+  sortOrder         Int      @default(0) @map("sort_order")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([colorSlug])
+  @@map("customization_color_model")
+}
+
 model ProductQtyDiscount {
   id        String   @id @default(uuid()) @db.VarChar(191)
   productId String   @db.VarChar(191)
