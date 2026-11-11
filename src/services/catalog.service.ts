@@ -486,7 +486,7 @@ export async function getColorModels(slug: string): Promise<ProductColorModelDTO
     // Fallback to defaults
   }
 
-  if (slug === "aerosoft-polo-200") {
+  if (slug === "aerosoft-polo-200" || slug.includes("polo")) {
     return DEFAULT_AEROSOFT_3D_MODELS;
   }
   return [];
