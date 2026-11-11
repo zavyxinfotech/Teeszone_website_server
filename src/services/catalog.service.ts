@@ -146,17 +146,34 @@ async function hydrateProducts(rows: ProductRow[]): Promise<ProductDTO[]> {
     if (isNew) collections.push("new-arrival");
     if (bestSeller) collections.push("best-sellers");
     if (megaSale) collections.push("mega-sale");
+
+    const rawName = row.name || "";
+    const name = rawName.startsWith("Customized ") ? rawName : `Customized ${rawName}`;
+
+    let price = row.price;
+    let mrp = row.mrp;
+    if (row.slug === "aerosoft-polo-200") {
+      price = 830;
+      mrp = 1999;
+    } else if (row.slug === "mens-polo-half-sleeve-240") {
+      price = 925;
+      mrp = 2399;
+    } else if (row.slug === "ecoblend-polo-neck-240") {
+      price = 975;
+      mrp = 1199;
+    }
+
     return {
       id: row.id,
-      name: row.name,
+      name,
       slug: row.slug,
       collections,
       description: row.description,
       fit: row.fit,
       fabric: row.fabric,
       gsm: row.gsm,
-      mrp: row.mrp,
-      price: row.price,
+      mrp,
+      price,
       colors: colorsBy.get(row.id) ?? [],
       sizes: (row.sizes as unknown as string[]) ?? [],
       qtyDiscounts: tiersBy.get(row.id) ?? [],
