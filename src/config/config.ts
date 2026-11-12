@@ -21,6 +21,9 @@ export default class Config {
   public resend_api_key: string;
   public mail_from: string;
   public enquiry_notify_email: string;
+  public order_notify_email: string;
+  public whatsapp_admin_number: string;
+  public whatsapp_webhook_url: string;
 
   public aws_access_key_id: string;
   public aws_secret_access_key: string;
@@ -52,7 +55,10 @@ export default class Config {
 
       RESEND_API_KEY: str({ devDefault: "" }),
       MAIL_FROM: str({ default: "TeesZone <no-reply@teeszone.in>" }),
-      ENQUIRY_NOTIFY_EMAIL: str({ devDefault: "" }),
+      ENQUIRY_NOTIFY_EMAIL: str({ devDefault: "info@teeszone.in", default: "info@teeszone.in" }),
+      ORDER_NOTIFY_EMAIL: str({ devDefault: "info@teeszone.in", default: "info@teeszone.in" }),
+      WHATSAPP_ADMIN_NUMBER: str({ default: "917550067704" }),
+      WHATSAPP_WEBHOOK_URL: str({ devDefault: "" }),
 
       AWS_ACCESS_KEY_ID: str({ devDefault: "" }),
       AWS_SECRET_ACCESS_KEY: str({ devDefault: "" }),
@@ -83,7 +89,10 @@ export default class Config {
 
     this.resend_api_key = e.RESEND_API_KEY;
     this.mail_from = e.MAIL_FROM;
-    this.enquiry_notify_email = e.ENQUIRY_NOTIFY_EMAIL;
+    this.enquiry_notify_email = e.ENQUIRY_NOTIFY_EMAIL || "info@teeszone.in";
+    this.order_notify_email = e.ORDER_NOTIFY_EMAIL || "info@teeszone.in";
+    this.whatsapp_admin_number = e.WHATSAPP_ADMIN_NUMBER || "917550067704";
+    this.whatsapp_webhook_url = e.WHATSAPP_WEBHOOK_URL || "";
 
     this.aws_access_key_id = e.AWS_ACCESS_KEY_ID;
     this.aws_secret_access_key = e.AWS_SECRET_ACCESS_KEY;

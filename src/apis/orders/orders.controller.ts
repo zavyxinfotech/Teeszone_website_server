@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { fmt } from "../../config";
 import { captureRequestError } from "../../utils/error-tracking";
 import client from "../../utils/prisma";
+import { sendOrderPlacedNotification } from "../../services/email.service";
+import { sendOrderWhatsAppAlert } from "../../services/whatsapp.service";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sendError = (reply: FastifyReply, error: any) => {
@@ -87,6 +89,28 @@ class OrdersController {
             razorpayPaymentId: b.razorpayPaymentId || null,
           },
         },
+      });
+
+      // Fire-and-forget real-time Email Notification to info@teeszone.in & customer
+      void sendOrderPlacedNotification({
+        orderNumber,
+        userName,
+        userEmail,
+        userPhone,
+        amount: b.amount,
+        items: b.items || [],
+        shippingAddress: b.shippingAddress,
+      });
+
+      // Fire-and-forget real-time WhatsApp alert to Admin
+      void sendOrderWhatsAppAlert({
+        orderNumber,
+        userName,
+        userPhone,
+        amount: b.amount,
+        itemsCount: Array.isArray(b.items)
+          ? b.items.reduce((acc: number, it: any) => acc + (it.qty || 1), 0)
+          : 1,
       });
 
       reply.status(201).send(fmt.formatResponse({ order }, "Order placed successfully"));
