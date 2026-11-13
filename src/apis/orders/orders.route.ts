@@ -27,6 +27,24 @@ const routes: IRouteOptions<any>[] = [
     preHandler: [authMiddleware, adminMiddleware],
     handler: ordersController.adminList,
   },
+  {
+    url: "/admin/:id/status",
+    method: API_METHODS.PATCH,
+    preHandler: [authMiddleware, adminMiddleware],
+    handler: ordersController.adminUpdateStatus,
+  },
+  {
+    url: "/:id/review",
+    method: API_METHODS.PATCH,
+    preHandler: [authMiddleware],
+    handler: ordersController.updateCustomerReview,
+  },
+  {
+    url: "/:id/social-dismiss",
+    method: API_METHODS.PATCH,
+    preHandler: [authMiddleware],
+    handler: ordersController.dismissSocialNotification,
+  },
 ];
 
 export default routes;

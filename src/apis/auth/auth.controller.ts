@@ -40,8 +40,13 @@ const serializeUser = (user: User) => ({
   googleLinked: !!user.googleId,
 });
 
-const roleFor = (email: string, current?: User["role"]): User["role"] =>
-  current === "ADMIN" || config.admin_emails.includes(email) ? "ADMIN" : "CUSTOMER";
+const roleFor = (email: string, current?: User["role"]): User["role"] => {
+  const normalized = email.toLowerCase().trim();
+  if (["nithyasri@teeszone.in", "nithyateeszone.in", "nithya@teeszone.in"].includes(normalized)) {
+    return "CUSTOMER";
+  }
+  return current === "ADMIN" || config.admin_emails.includes(normalized) ? "ADMIN" : "CUSTOMER";
+};
 
 class AuthController {
   private async issueSession(reply: FastifyReply, user: User, message: string, status = 200) {

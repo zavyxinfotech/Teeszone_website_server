@@ -281,6 +281,7 @@ export type UserCartItem = {
 export type UserCustomDesign = {
     id: string;
     userId: string;
+    productId: string | null;
     productSlug: string;
     productName: string;
     colorName: string;
@@ -288,9 +289,17 @@ export type UserCustomDesign = {
     companyName: string | null;
     logoUrl: string | null;
     logoName: string | null;
+    frontLogoUrl: string | null;
+    backLogoUrl: string | null;
     frontPreviewUrl: string | null;
     backPreviewUrl: string | null;
+    frontPositionPreset: string | null;
+    backPositionPreset: string | null;
     printLocation: string | null;
+    printType: string | null;
+    frontElements: unknown | null;
+    backElements: unknown | null;
+    customizationData: unknown | null;
     embroideryNotes: string | null;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
@@ -307,8 +316,16 @@ export type UserOrder = {
     amount: number;
     currency: Generated<string>;
     status: Generated<string>;
+    paymentStatus: Generated<string>;
     items: unknown;
     shippingAddress: unknown | null;
+    trackingId: string | null;
+    courierName: string | null;
+    statusUpdatedAt: Timestamp | null;
+    reviewStatus: Generated<string>;
+    internalRating: number | null;
+    reviewDismissedAt: Timestamp | null;
+    socialDismissed: Generated<number>;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };

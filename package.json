@@ -5,6 +5,7 @@
   "main": "build/src/server.js",
   "scripts": {
     "dev": "tsnd --transpile-only --respawn --exit-child src/server.ts",
+    "build": "tsc",
     "build:tsc": "tsc && echo 'Build Completed Success'",
     "start": "NODE_ENV=production node build/src/server.js",
     "postinstall": "npx prisma generate",

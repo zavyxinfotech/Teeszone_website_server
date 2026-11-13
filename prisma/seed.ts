@@ -250,7 +250,6 @@ async function main() {
     { email: "teeszoneindia@gmail.com", name: "Admin", password: "teeszone@2025" },
     { email: "vijayadarshini@teeszone.in", name: "Vijayadarshini", password: "tees@2026" },
     { email: "archana@teeszone.in", name: "Archana", password: "tees@2026" },
-    { email: "nithyasri@teeszone.in", name: "Nithyasri", password: "tees@2026" },
     { email: "vasuki@zavyx.in", name: "Vasuki", password: "tees@2026" },
   ];
 

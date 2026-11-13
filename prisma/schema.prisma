@@ -497,15 +497,24 @@ model UserOrder {
   razorpayPaymentId String?  @db.VarChar(191)
   amount            Int
   currency          String   @default("INR") @db.VarChar(10)
-  status            String   @default("PAID") @db.VarChar(50)
+  status            String    @default("Order Placed") @db.VarChar(50)
+  paymentStatus     String    @default("PAID") @db.VarChar(50)
   items             Json
   shippingAddress   Json?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  trackingId        String?   @db.VarChar(100)
+  courierName       String?   @db.VarChar(100)
+  statusUpdatedAt   DateTime?
+  reviewStatus      String    @default("Review Pending") @db.VarChar(50)
+  internalRating    Int?
+  reviewDismissedAt DateTime?
+  socialDismissed   Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([createdAt])
+  @@index([status])
   @@map("userorder")
 }

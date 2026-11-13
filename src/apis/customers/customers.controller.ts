@@ -45,6 +45,9 @@ class CustomersController {
       const { q, role, page, limit } = req.query;
       const where: Prisma.UserWhereInput = {
         deletedAt: null,
+        email: {
+          notIn: ["nithyasri@teeszone.in", "nithyateeszone.in", "nithya@teeszone.in"],
+        },
         ...(role ? { role } : {}),
         ...(q
           ? {
@@ -86,7 +89,13 @@ class CustomersController {
           },
         },
       });
-      if (!row) {
+      if (
+        !row ||
+        (row.email &&
+          ["nithyasri@teeszone.in", "nithyateeszone.in", "nithya@teeszone.in"].includes(
+            row.email.toLowerCase()
+          ))
+      ) {
         throw new NotFoundException({
           message: "Customer not found",
           description: `No customer with id "${req.params.id}".`,

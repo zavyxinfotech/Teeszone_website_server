@@ -72,7 +72,7 @@ AWS_REGION=ap-south-1
 AWS_BUCKET_NAME=your_s3_bucket
 RAZORPAY_KEY_ID=rzp_live_...
 RAZORPAY_KEY_SECRET=...
-ADMIN_EMAILS=teeszoneindia@gmail.com,vijayadarshini@teeszone.in,archana@teeszone.in,nithyasri@teeszone.in,vasuki@zavyx.in
+ADMIN_EMAILS=teeszoneindia@gmail.com,vijayadarshini@teeszone.in,archana@teeszone.in,vasuki@zavyx.in
 ```
 
 ### 2. Install Dependencies & Generate Prisma Client
